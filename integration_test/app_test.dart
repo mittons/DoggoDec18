@@ -7,7 +7,7 @@ import 'package:doggo_dec_18/main.dart' as app;
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  // remember CI env stuff
+  const ciRun = bool.fromEnvironment('CI', defaultValue: false);
 
   group("Run app", () {
     //
@@ -30,27 +30,38 @@ void main() {
       expect(
           find.widgetWithText(ElevatedButton, "List dogs, please!"), findsOne);
 
-      // -------------------------------------------------------
-      // | Click "Get dog breeds" and expect a snackbar..
+      // -------------------------------------------------------------
+      // | Click "Get dog breeds" and expect a list of doggo breeds..
       // |   to be displayed
-      // -------------------------------------------------------
+      // -------------------------------------------------------------
 
-      // Expect no "not implemented yet" snackbar to displayed before the button is pressed
-      expect(
-          find.widgetWithText(SnackBar,
-              "This feature is not yet implemented. We are working hard to deliver on expectations!"),
-          findsNothing);
+      // Expect no list tiles to displayed before the button is ever pressed
+      expect(find.byType(ListTile), findsNothing);
 
       // Click the request button
       await widgetTester
           .tap(find.widgetWithText(ElevatedButton, "List dogs, please!"));
       await widgetTester.pumpAndSettle();
 
-      // Expect "not implemented yet" snackbar to displayed
-      expect(
-          find.widgetWithText(SnackBar,
-              "This feature is not yet implemented. We are working hard to deliver on expectations!"),
-          findsOneWidget);
+      // If the CI flag isn't set we arent running against a service/service response path we know is in an environment we control
+      // - So we give the service a few seconds to respond.
+      if (!ciRun) {
+        await Future.delayed(const Duration(seconds: 5));
+      }
+
+      // Expect that the list has been initialized and list tiles are being displayed after the button is pressed
+      expect(find.byType(ListTile), findsAtLeastNWidgets(1));
+
+      // If we are doing a run with the CI flag set we can assume that we are running against a mock api service running locally
+      // - With predefined dataset. We assume we are running against the docker image mockdogapidec18.
+      //   - In that case we test against the expected data
+      for (String dogBreed in [
+        "Affenpinscher",
+        "Afghan Hound",
+        "African Hunting Dog"
+      ]) {
+        expect(find.widgetWithText(ListTile, dogBreed), findsOneWidget);
+      }
     });
   });
 }
