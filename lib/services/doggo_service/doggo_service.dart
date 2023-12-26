@@ -4,7 +4,6 @@ import 'package:doggo_dec_18/models/doggo_service/doggo_breed.dart';
 import 'package:doggo_dec_18/services/service_result.dart';
 import 'package:http/http.dart' as http;
 import 'package:doggo_dec_18/utils/service_locator.dart' as srv_loc;
-import 'package:doggo_dec_18/config/config.dart' as cfg;
 
 class DoggoService {
   final String baseDogApiUrl;
@@ -16,7 +15,7 @@ class DoggoService {
   }
 
   String _generateRequestUrl(String endpointRoute) {
-    return "$baseDogApiUrl$endpointRoute?key=${cfg.dogApiKey}";
+    return "$baseDogApiUrl$endpointRoute";
   }
 
   Future<ServiceResult<List<DoggoBreed>?>> getBreeds() async {

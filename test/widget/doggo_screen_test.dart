@@ -44,7 +44,7 @@ void main() {
       await widgetTester.pumpAndSettle();
 
       // Get our own copy of the data that defines the expected state change
-      List<DoggoBreed> dogBreeds = (await mockDoggoService.getBreeds()).data!;
+      List<DoggoBreed> dogBreeds = mockDoggoService.getBreedsSync().data!;
 
       // Perform tests
       // Expect that the list of dog breeds is not displayed before the request button is ever pressed
@@ -52,10 +52,22 @@ void main() {
         expect(find.widgetWithText(ListTile, doggoBreed.name), findsNothing);
       }
 
+      // Verify that progress indicator is not displayed
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+
       // Press button
       await widgetTester
           .tap(find.widgetWithText(ElevatedButton, "List dogs, please!"));
+      await widgetTester.pump(const Duration(milliseconds: 100));
+
+      // Expect there to be a circular progress indicator just after the request button is first pressed.
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+      // Run the app until nothing is happening
       await widgetTester.pumpAndSettle();
+
+      // Expect the progress indicator to be gone
+      expect(find.byType(CircularProgressIndicator), findsNothing);
 
       // Expect the list of dog(go) breeds to be displayed after the request button has been pressed
       for (DoggoBreed doggoBreed in dogBreeds) {

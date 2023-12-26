@@ -9,6 +9,13 @@ class MockDoggoService extends DoggoService {
 
   @override
   Future<ServiceResult<List<DoggoBreed>?>> getBreeds() async {
+    // Simulate slight delay in the function return time
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    return getBreedsSync();
+  }
+
+  ServiceResult<List<DoggoBreed>?> getBreedsSync() {
     List<DoggoBreed> mockDoggoList = [1, 2, 3, 4, 5]
         .map((mockDoggoBreedIdx) => DoggoBreed(
             id: mockDoggoBreedIdx,
